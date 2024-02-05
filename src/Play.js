@@ -5,7 +5,8 @@ class Play extends Phaser.Scene {
 
     init() {
         // useful variables
-        this.SHOT_VELOCITY_X = 200
+        this.SHOT_VELOCITY_X_MIN = 0
+        this.SHOT_VELOCITY_X_MAX = 300
         this.SHOT_VELOCITY_Y_MIN = 700
         this.SHOT_VELOCITY_Y_MAX = 1100
     }
@@ -39,6 +40,9 @@ class Play extends Phaser.Scene {
         // add walls
         let wallA = this.physics.add.sprite(0, height / 4, 'wall')
         wallA.setX(Phaser.Math.Between(0 + wallA.width/2, width - wallA.width/2))
+        wallA.setVelocityX(100)
+        wallA.setCollideWorldBounds(true)
+        wallA.setBounce(1, 1)
         wallA.body.setImmovable(true)
 
         let wallB = this.physics.add.sprite(0, height / 2, 'wall')
@@ -55,14 +59,16 @@ class Play extends Phaser.Scene {
 
         // add pointer input
         this.input.on('pointerdown', (pointer) => {
-            let shotDirection = pointer.y <= this.ball.y ? 1 : -1
-            this.ball.body.setVelocityX(Phaser.Math.Between(-this.SHOT_VELOCITY_X, this.SHOT_VELOCITY_X))
-            this.ball.body.setVelocityY(Phaser.Math.Between(this.SHOT_VELOCITY_Y_MIN, this.SHOT_VELOCITY_Y_MAX) * shotDirection)
+            let shotDirectionY = pointer.y <= this.ball.y ? 1 : -1
+            let shotDirectionX = pointer.x <= this.ball.x ? 1 : -1
+            this.ball.body.setVelocityX(Phaser.Math.Between(-this.SHOT_VELOCITY_X_MIN, this.SHOT_VELOCITY_X_MAX) * shotDirectionX)
+            this.ball.body.setVelocityY(Phaser.Math.Between(this.SHOT_VELOCITY_Y_MIN, this.SHOT_VELOCITY_Y_MAX) * shotDirectionY)
         })
 
         // cup/ball collision
         this.physics.add.collider(this.ball, this.cup, (ball, cup) => {
-            ball.destroy()
+            this.ball.body.setVelocity(0,0)
+            ball.setPosition(width / 2, height - height / 10)
         })
 
         // ball/wall collision
@@ -79,8 +85,8 @@ class Play extends Phaser.Scene {
 /*
 CODE CHALLENGE
 Try to implement at least 3/4 of the following features during the remainder of class (hint: each takes roughly 15 or fewer lines of code to implement):
-[ ] Add ball reset logic on successful shot
-[ ] Improve shot logic by making pointer’s relative x-position shoot the ball in correct x-direction
-[ ] Make one obstacle move left/right and bounce against screen edges
+[X] Add ball reset logic on successful shot
+[X] Improve shot logic by making pointer’s relative x-position shoot the ball in correct x-direction
+[X] Make one obstacle move left/right and bounce against screen edges
 [ ] Create and display shot counter, score, and successful shot percentage
 */
